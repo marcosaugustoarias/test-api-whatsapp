@@ -11,21 +11,35 @@ async def process_data(data: str = Query(...)):
     Procesa los datos enviados desde el botón de WhatsApp.
 
     Formato esperado:
-    - data: "<phone>-<option>"
+    - data: "<phone>-<option>" o solo "<option>"
     """
     try:
-        phone, option = data.split("-")
-
-        if not phone.isdigit():
-            raise ValueError("El número de teléfono debe contener solo dígitos.")
+        # Dividir los datos recibidos
+        parts = data.split("-")
         
-        return {
-            "message": f"Usted seleccionó la opción {option}"
-        }
-    except ValueError:
+        # Validar si incluye teléfono
+        if len(parts) == 2:
+            phone, option = parts
+            if not phone.isdigit():
+                raise ValueError("El número de teléfono debe contener solo dígitos.")
+        elif len(parts) == 1:
+            option = parts[0]
+            phone = None
+        else:
+            raise ValueError("Formato incorrecto de datos.")
+
+        if phone:
+            return {
+                "message": f"Número: {phone}, opción seleccionada: {option}"
+            }
+        else:
+            return {
+                "message": f"Opción seleccionada: {option} (Número no proporcionado)"
+            }
+    except ValueError as e:
         raise HTTPException(
             status_code=400, 
-            detail="Formato de datos inválido. Asegúrate de enviar 'phone-option'."
+            detail=f"Formato de datos inválido. {str(e)} Asegúrate de enviar '<phone>-<option>' o '<option>'."
         )
 
 if __name__ == "__main__":
