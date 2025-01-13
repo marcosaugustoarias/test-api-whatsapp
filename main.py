@@ -1,4 +1,5 @@
 import os
+import json
 from fastapi import FastAPI, Query, HTTPException
 from dotenv import load_dotenv
 load_dotenv()
@@ -9,15 +10,21 @@ app = FastAPI()
 async def process_data(data: str = Query(...)):
     """
     Procesa los datos enviados desde el botón de WhatsApp.
-
-    Formato esperado:
-    - data: "<phone>-<option>" o solo "<option>"
     """
     try:
-        # Dividir los datos recibidos
+        # Registrar los datos recibidos para depuración
+        print(f"Datos recibidos (raw): {data}")
+        
+        # Intentar analizar como JSON si es posible
+        try:
+            data_as_json = json.loads(data)
+            print(f"Datos analizados como JSON: {data_as_json}")
+        except json.JSONDecodeError:
+            print("No se pudo analizar como JSON. Procesando como texto plano.")
+
+        # Dividir los datos por guión
         parts = data.split("-")
         
-        # Validar si incluye teléfono
         if len(parts) == 2:
             phone, option = parts
             if not phone.isdigit():
@@ -30,11 +37,13 @@ async def process_data(data: str = Query(...)):
 
         if phone:
             return {
-                "message": f"Número: {phone}, opción seleccionada: {option}"
+                "message": f"Número: {phone}, opción seleccionada: {option}",
+                "raw_data": data
             }
         else:
             return {
-                "message": f"Opción seleccionada: {option} (Número no proporcionado)"
+                "message": f"Opción seleccionada: {option} (Número no proporcionado)",
+                "raw_data": data
             }
     except ValueError as e:
         raise HTTPException(
