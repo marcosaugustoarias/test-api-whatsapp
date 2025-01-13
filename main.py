@@ -48,7 +48,7 @@ async def process_data(data: str = Query(...)):
     except ValueError as e:
         raise HTTPException(
             status_code=400, 
-            detail=f"Formato de datos inválido. {str(e)} Asegúrate de enviar '<phone>-<option>' o '<option>'."
+            detail=f"Formato de datos inválido."
         )
 
 if __name__ == "__main__":
