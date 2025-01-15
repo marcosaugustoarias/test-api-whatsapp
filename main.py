@@ -44,14 +44,14 @@ async def webhook(request: Request):
         raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
 
 @app.get("/webhook")
-async def verify_webhook(mode: str = None, token: str = None, challenge: str = None):
+async def verify_webhook(hub_mode: str = None, hub_verify_token: str = None, hub_challenge: str = None):
     """
     Verifica el webhook con el token de Meta.
     """
     VERIFY_TOKEN = "trasladawhatsapp2025"
 
-    if mode == "subscribe" and token == VERIFY_TOKEN:
-        return challenge
+    if hub_mode == "subscribe" and hub_verify_token == VERIFY_TOKEN:
+        return hub_challenge  # Devolver texto plano
     else:
         raise HTTPException(status_code=403, detail="Token de verificación inválido.")
 
