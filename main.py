@@ -48,7 +48,7 @@ async def verify_webhook(mode: str = None, token: str = None, challenge: str = N
     """
     Verifica el webhook con el token de Meta.
     """
-    VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "your_verify_token")
+    VERIFY_TOKEN = "trasladawhatsapp2025"
 
     if mode == "subscribe" and token == VERIFY_TOKEN:
         return challenge
