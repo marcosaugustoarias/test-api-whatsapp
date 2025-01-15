@@ -1,70 +1,53 @@
 import os
 import json
-from urllib.parse import unquote, urlparse, parse_qs
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Request, HTTPException
 from dotenv import load_dotenv
 
+# Cargar variables de entorno
 load_dotenv()
 
 app = FastAPI()
 
-@app.get("/process")
-async def process_data(data: str = Query(...)):
+@app.post("/webhook")
+async def webhook(request: Request):
     """
-    Procesa los datos enviados desde el botón de WhatsApp.
+    Procesa las solicitudes entrantes desde el webhook de Meta para detectar qué botón fue presionado.
     """
     try:
-        # Registrar los datos recibidos para depuración
-        print(f"Datos recibidos (raw): {data}")
+        # Leer el cuerpo de la solicitud
+        body = await request.json()
+        print(f"Payload recibido: {json.dumps(body, indent=2)}")
 
-        # Decodificar datos si están codificados como URL
-        decoded_data = unquote(data)
-        print(f"Datos decodificados: {decoded_data}")
+        # Validar que el payload contenga datos relevantes
+        if "entry" in body and isinstance(body["entry"], list):
+            for entry in body["entry"]:
+                if "changes" in entry and isinstance(entry["changes"], list):
+                    for change in entry["changes"]:
+                        if "value" in change and "messages" in change["value"]:
+                            messages = change["value"]["messages"]
+                            for message in messages:
+                                if "button" in message:
+                                    button_payload = message["button"].get("payload")
+                                    print(f"Botón presionado: {button_payload}")
+                                    return {"message": "Botón presionado", "payload": button_payload}
 
-        # Detectar si el dato decodificado es otra URL
-        if "?" in decoded_data:
-            parsed_url = urlparse(decoded_data)
-            query_params = parse_qs(parsed_url.query)
-            # Intentar obtener el parámetro `data` interno si existe
-            if "data" in query_params:
-                decoded_data = query_params["data"][0]
-                print(f"Datos internos procesados: {decoded_data}")
+        return {"status": "no_button", "message": "No se encontró información de botón en el payload."}
 
-        # Procesar los datos como antes
-        parts = decoded_data.split("-")
-
-        if len(parts) == 2:
-            phone, option = parts
-            if not phone.isdigit():
-                raise ValueError("El número de teléfono debe contener solo dígitos.")
-        elif len(parts) == 1:
-            option = parts[0]
-            phone = None
-        else:
-            raise ValueError("Formato incorrecto de datos.")
-
-        if phone:
-            return {
-                "message": f"Número: {phone}, opción seleccionada: {option}",
-                "raw_data": data,
-                "decoded_data": decoded_data,
-            }
-        else:
-            return {
-                "message": f"Opción seleccionada: {option} (Número no proporcionado)",
-                "raw_data": data,
-                "decoded_data": decoded_data,
-            }
-    except ValueError as e:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Formato de datos inválido: {str(e)}"
-        )
     except Exception as e:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Error inesperado: {str(e)}"
-        )
+        print(f"Error al procesar el webhook: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
+
+@app.get("/webhook")
+async def verify_webhook(mode: str = None, token: str = None, challenge: str = None):
+    """
+    Verifica el webhook con el token de Meta.
+    """
+    VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "your_verify_token")
+
+    if mode == "subscribe" and token == VERIFY_TOKEN:
+        return challenge  
+    else:
+        raise HTTPException(status_code=403, detail="Token de verificación inválido.")
 
 if __name__ == "__main__":
     import uvicorn
