@@ -7,6 +7,13 @@ load_dotenv()
 
 app = FastAPI()
 
+@app.get("/")
+async def root():
+    """
+    Endpoint raíz para confirmar que el servicio está funcionando correctamente.
+    """
+    return {"message": "El servicio está funcionando correctamente."}
+
 @app.post("/webhook")
 async def webhook(request: Request):
     """
