@@ -44,7 +44,7 @@ async def verify_webhook(mode: str = None, token: str = None, challenge: str = N
     VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "your_verify_token")
 
     if mode == "subscribe" and token == VERIFY_TOKEN:
-        return int(challenge)
+        return challenge
     else:
         raise HTTPException(status_code=403, detail="Token de verificación inválido.")
 
