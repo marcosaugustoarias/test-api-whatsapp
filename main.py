@@ -46,7 +46,7 @@ async def webhook(request: Request):
 @app.get("/webhook")
 async def verify_webhook(request: Request):
 
-    VERIFY_TOKEN = "traslada2025"
+    VERIFY_TOKEN = "traslada"
 
     # Obtener los parámetros manualmente
     params = request.query_params
