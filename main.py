@@ -48,7 +48,7 @@ async def verify_webhook(hub_mode: str = None, hub_verify_token: str = None, hub
     """
     Verifica el webhook con el token de Meta.
     """
-    VERIFY_TOKEN = "trasladawhatsapp2025"
+    VERIFY_TOKEN = "traslada2025"
 
     if hub_mode == "subscribe" and hub_verify_token == VERIFY_TOKEN:
         return hub_challenge  # Devolver texto plano
