@@ -44,14 +44,21 @@ async def webhook(request: Request):
         raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
 
 @app.get("/webhook")
-async def verify_webhook(hub_mode: str = None, hub_verify_token: str = None, hub_challenge: str = None):
-    """
-    Verifica el webhook con el token de Meta.
-    """
+async def verify_webhook(request: Request):
+
     VERIFY_TOKEN = "traslada2025"
 
+    # Obtener los parámetros manualmente
+    params = request.query_params
+    hub_mode = params.get("hub.mode")
+    hub_verify_token = params.get("hub.verify_token")
+    hub_challenge = params.get("hub.challenge")
+
+    # Log para depurar
+    print(f"Recibido: hub_mode={hub_mode}, hub_verify_token={hub_verify_token}, hub_challenge={hub_challenge}")
+
     if hub_mode == "subscribe" and hub_verify_token == VERIFY_TOKEN:
-        return hub_challenge  # Devolver texto plano
+        return hub_challenge  
     else:
         raise HTTPException(status_code=403, detail="Token de verificación inválido.")
 
