@@ -1,6 +1,7 @@
 import os
 import json
 from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import Response
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -58,8 +59,8 @@ async def verify_webhook(request: Request):
     print(f"Recibido: hub_mode={hub_mode}, hub_verify_token={hub_verify_token}, hub_challenge={hub_challenge}")
 
     if hub_mode == "subscribe" and hub_verify_token == VERIFY_TOKEN:
-        #return PlainTextResponse(content=hub_challenge)
-        return hub_challenge
+        #return hub_challenge
+        return Response(content=hub_challenge, media_type="text/plain")
     else:
         if hub_mode != "subscribe":
             raise HTTPException(status_code=400, detail="invalid mode")
