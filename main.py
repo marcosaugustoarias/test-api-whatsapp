@@ -61,7 +61,11 @@ async def verify_webhook(request: Request):
         #return PlainTextResponse(content=hub_challenge)
         return hub_challenge
     else:
-        raise HTTPException(status_code=403, detail="Token de verificación inválido.")
+        if hub_mode != "subscribe":
+            raise HTTPException(status_code=400, detail="invalid mode")
+
+        if hub_verify_token != VERIFY_TOKEN:
+            raise HTTPException(status_code=401, detail="invalid VERIFY TOKEN")
 
 if __name__ == "__main__":
     import uvicorn
