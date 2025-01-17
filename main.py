@@ -58,8 +58,8 @@ async def verify_webhook(request: Request):
     print(f"Recibido: hub_mode={hub_mode}, hub_verify_token={hub_verify_token}, hub_challenge={hub_challenge}")
 
     if hub_mode == "subscribe" and hub_verify_token == VERIFY_TOKEN:
-        #return hub_challenge  # Devolver texto plano
-        return PlainTextResponse(content=hub_challenge)
+        #return PlainTextResponse(content=hub_challenge)
+        return hub_challenge
     else:
         raise HTTPException(status_code=403, detail="Token de verificación inválido.")
 
